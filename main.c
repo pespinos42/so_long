@@ -20,14 +20,14 @@
 #include <stdio.h>
 #include "MLX42/include/MLX42/MLX42.h"
 
-typedef struct s_nlines
-{
-	int		lines;
-	int		ch1;
-	int		ch2;
-	char	*str;
-	int		control;
-}	t_nlines;
+// typedef struct s_nlines
+// {
+// 	int		lines;
+// 	int		ch1;
+// 	int		ch2;
+// 	char	*str;
+// 	int		control;
+// }	t_nlines;
 
 //CABECERAS---------------------------------------------------------------------
 char	*ft_strjoin(char const *s1, char const *s2);
@@ -209,38 +209,64 @@ char	*ft_get_next_line(int fd)
 	return (str);
 }
 
-int	ft_number_lines(int fd)
+int ft_strlen_n(char *str)
 {
-	t_nlines	d;
+	int len = 0;
 
-	d.lines = 0;
-	d.ch1 = 0;
-	d.ch2 = 0;
-	d.control = 1;
-	d.str = ft_get_next_line(fd);
-	while (d.str && d.control == 1)
+	while (str[len] && str[len] != '\n')
+		len++;
+	return (len);
+}
+
+int	ft_number_columns(int fd)
+{
+	char	*str;
+	int		column1;
+	int		columnn;
+	int		control;
+
+	column1 = 0;
+	columnn = 0;
+	control = 1;
+	str = ft_get_next_line(fd);
+	while (str && control == 1)
 	{
-		d.ch2 = 0;
-		d.lines++;
-		if (d.ch1 == 0)
-			d.ch1 = ft_strlen(d.str);
+		columnn = 0;
+		if (column1 == 0)
+			column1 = ft_strlen_n(str);
 		else
-			d.ch2 = ft_strlen(d.str);
-		if (d.ch1 != d.ch2 && d.ch2 != 0)
-			d.control = 0;
-		d.str = ft_get_next_line(fd);
+			columnn = ft_strlen_n(str);
+		if (column1 != columnn && columnn != 0)
+			control = 0;
+		str = ft_get_next_line(fd);
 	}
-	close (fd);
-	if (d.control == 0)
+	close(fd);
+	if (control == 0)
 	{
-		printf("ERROR\nNo todas las filas tienen la misma longitud\n");
+		printf("ERROR\nNO TODAS LAS LINEAS TIENEN LA MISMA LONGITUD\n");
 		return (-1);
 	}
 	else
 	{
-		printf("NUMERO DE LINEAS: %i\n", d.lines);
-		return (d.lines);
+		printf("NUMERO DE COLUMNAS %i\n", column1);
+		return (column1);
 	}
+}
+
+int	ft_number_lines(int fd)
+{
+	int		lines;
+	char	*str;
+
+	lines = 0;
+	str = ft_get_next_line(fd);
+	while (str)
+	{
+		lines++;
+		str = ft_get_next_line(fd);
+	}
+	printf("EL NUMERO DE LINEAS %i\n", lines);
+	return (lines);
 }
 
 //MAIN--------------------------------------------------------------------------
@@ -256,6 +282,8 @@ int	main(int argc, char **argv)
 	{
 		fd = open(argv[1], O_RDONLY);
 		ft_number_lines(fd);
+		fd = open(argv[1], O_RDONLY);
+		ft_number_columns(fd);
 		fd = open(argv[1], O_RDONLY);
 		str = ft_get_next_line(fd);
 		while (str)
