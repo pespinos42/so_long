@@ -253,44 +253,102 @@ int	ft_number_columns(int fd)
 	}
 }
 
-int	ft_number_lines(int fd)
+int	ft_number_rows(int fd)
 {
-	int		lines;
+	int		rows;
 	char	*str;
 
-	lines = 0;
+	rows = 0;
 	str = ft_get_next_line(fd);
 	while (str)
 	{
-		lines++;
+		rows++;
 		str = ft_get_next_line(fd);
 	}
-	printf("EL NUMERO DE LINEAS %i\n", lines);
-	return (lines);
+	printf("EL NUMERO DE LINEAS %i\n", rows);
+	return (rows);
+}
+
+char	**ft_create_content(int fd, int rows)
+{
+	char	**content;
+	char	*str;
+	int		r;
+
+	r = 0;
+	content = malloc (rows * sizeof (char *));
+	if (!content)
+		return (NULL);
+	str = ft_get_next_line(fd);
+	while (str && r < rows)
+	{
+		content[r++] = ft_substr(str, 0, ft_strlen_n(str));
+		str = ft_get_next_line(fd);
+	}
+	close(fd);
+	return (content);
+}
+
+void	ft_check_walls(char **content, int rows, int columns)
+{
+	int	r;
+	int	c;
+	int	walls_ok;
+
+	r = 0;
+	c = 0;
+	walls_ok = 1;
+	while (r < rows && walls_ok == 1)
+	{
+		c = 0;
+		while (c < columns && walls_ok == 1)
+		{
+			if (r != 0 && r != rows - 1)
+			{
+				if (c == 0 || c == columns - 1)
+				{
+					if (content[r][c] != '1')
+						walls_ok = 0;
+				}
+			}
+			else if (r == 0 || r == rows - 1)
+			{
+				if (content[r][c] != '1')
+					walls_ok = 0;
+			}
+			c++;
+		}
+		r++;
+	}
+	if (walls_ok)
+		printf("MUROS CORRECTOS\n");
+	else
+		printf("MUROS ERRONEOS\n");
 }
 
 //MAIN--------------------------------------------------------------------------
 int	main(int argc, char **argv)
 {
-	//char	**lines;
+	char	**content;
+	int		rows;
+	int		columns;
 	int		fd;
-	char	*str;
+	int r = 0;
 
 	fd = 0;
-	str = NULL;
+	rows = 0;
+	columns = 0;
 	if (argc == 2)
 	{
 		fd = open(argv[1], O_RDONLY);
-		ft_number_lines(fd);
+		rows = ft_number_rows(fd);
 		fd = open(argv[1], O_RDONLY);
-		ft_number_columns(fd);
+		columns = ft_number_columns(fd);
 		fd = open(argv[1], O_RDONLY);
-		str = ft_get_next_line(fd);
-		while (str)
-		{
-			printf("%s", str);
-			str = ft_get_next_line(fd);
-		}
+		content = ft_create_content(fd, rows);
+		while (r < rows)
+			printf("%s\n", content[r++]);
+		ft_check_walls(content, rows, columns);
 	}
 	return (0);
 }
