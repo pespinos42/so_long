@@ -34,7 +34,7 @@ char	*ft_strnstr(const char *b, const char *l, size_t len)
 		p2 = 0;
 		while (b[p1 + p2] && b[p1 + p2] == l[p2] && p1 + p2 < len)
 		{
-			if (l[p2 + 1] == '\0')
+			if (l[p2 + 1] == '\0' && b[p1 + p2 + 1] == '\0')
 				return ((char *) &b[p1]);
 			p2++;
 		}
@@ -178,6 +178,8 @@ int	ft_control_char(char **content, int rows, int columns)
 	tc.n_c = 0;
 	tc.n_e = 0;
 	tc.n_p = 0;
+	tc.row = 0;
+	tc.column = 0;
 	ft_control_char_count(content, rows, columns, &tc);
 	//printf("C->%i\t\tE->%i\t\tP->%i\n", tc.n_c, tc.n_e, tc.n_p);
 	if (tc.n_c <= 0 || tc.n_e <= 0 || tc.n_p <= 0)
