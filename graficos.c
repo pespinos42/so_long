@@ -6,7 +6,7 @@
 /*   By: pespinos <pespinos@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/04 12:37:05 by pespinos          #+#    #+#             */
-/*   Updated: 2022/12/04 14:01:12 by pespinos         ###   ########.fr       */
+/*   Updated: 2022/12/05 18:40:25 by pespinos         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,51 +49,29 @@ void	ft_fill_image(mlx_image_t *img, int width, int height, int color)
 
 int main()
 {
-	int px = 0;
-	int py = 0;
+	mlx_t			*mlx;
+	mlx_texture_t	*texture;
+	mlx_image_t		*img;
+	int				width;
+	int				height;
 
-	t_data_window dw;
-	t_data_img *di;
-
-	dw.width = 500;
-	dw.height = 500;
-
-	di = malloc (3 * sizeof (*di));
-	if (!di)
+	width = 500;
+	height = 500;
+	mlx = mlx_init(width, height, "TEXTURAS", false);
+	if (!mlx)
 		exit(EXIT_FAILURE);
-		
-	dw.mlx = mlx_init(dw.width, dw.height, "VENTANA", false);
-	if (!dw.mlx)
+	texture = mlx_load_png("./sprite_prueba.png");
+	if (!texture)
 		exit(EXIT_FAILURE);
-		
-	di[0].width = 32;
-	di[0].height = 32;
-	di[0].position_x = 0;
-	di[0].position_y = 0;
-	di[0].img = mlx_new_image(dw.mlx, di[0].width, di[0].height);
-	mlx_image_to_window(dw.mlx, di[0].img, di[0].position_x, di[0].position_y);
-	ft_fill_image(di[0].img, di[0].width, di[0].height, 0xFF0000FF);
-
-	di[1].width = 32;
-	di[1].height = 32;
-	di[1].position_x = 32;
-	di[1].position_y = 0;
-	di[1].img = mlx_new_image(dw.mlx, di[1].width, di[1].height);
-	mlx_image_to_window(dw.mlx, di[1].img, di[1].position_x, di[1].position_y);
-	ft_fill_image(di[1].img, di[1].width, di[1].height, 0x00FF00FF);
-
-	di[2].width = 32;
-	di[2].height = 32;
-	di[2].position_x = 64;
-	di[2].position_y = 0;
-	di[2].img = mlx_new_image(dw.mlx, di[2].width, di[2].height);
-	mlx_image_to_window(dw.mlx, di[2].img, di[2].position_x, di[2].position_y);
-	ft_fill_image(di[2].img, di[2].width, di[2].height, 0x0000FFFF);
-	
-	mlx_loop(dw.mlx);
-	mlx_delete_image(dw.mlx, di[0].img);
-	mlx_delete_image(dw.mlx, di[1].img);
-	mlx_delete_image(dw.mlx, di[2].img);
-	mlx_terminate(dw.mlx);
+	img = mlx_texture_to_image(mlx, texture);
+	if (!img)
+		exit(EXIT_FAILURE);
+	mlx_image_to_window(mlx, img, 0, 0);
+	mlx_image_to_window(mlx, img, 32, 0);
+	img->instances[0].x += 100;
+	mlx_loop(mlx);
+	mlx_delete_image(mlx, img);
+	mlx_delete_texture(texture);
+	mlx_terminate(mlx);
 	return (EXIT_SUCCESS);
 }
