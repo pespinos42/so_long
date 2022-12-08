@@ -6,7 +6,7 @@
 /*   By: pespinos <pespinos@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 10:30:10 by pespinos          #+#    #+#             */
-/*   Updated: 2022/12/06 19:11:24 by pespinos         ###   ########.fr       */
+/*   Updated: 2022/12/08 12:55:32 by pespinos         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,14 +440,22 @@ int	ft_check_other_position(char **content, t_player *player, int rows, int colu
 			content[player->player_row][player->player_column] = '0';
 			str = content[player->op_row][player->op_column];
 			str = content[player->player_row][player->player_column];
+			player->player_row = player->op_row;
+			player->player_column = player->op_column;
+			return (1);
 		}
 		else
+		{	
 			printf("HAY UN MURO EN ESA POSICION\n");
+			return(0);
+		}
 	}
+	else
+		return (0);
 	
 }
 
-void	ft_move_player(char **content, t_player *player, int rows, int columns)
+int	ft_move_player(char **content, t_player *player, int rows, int columns)
 {	
 	if (player->move == 'w')
 	{
@@ -469,7 +477,7 @@ void	ft_move_player(char **content, t_player *player, int rows, int columns)
 		player->op_column = player->player_column + 1;
 		player->op_row = player->player_row;
 	}
-	ft_check_other_position(content, player, rows, columns);
+	return(ft_check_other_position(content, player, rows, columns));
 }
 
 void	ft_kernel(char **content, int rows, int columns)
@@ -486,11 +494,12 @@ void	ft_kernel(char **content, int rows, int columns)
 	printf("\n\n\nCOMIENZA EL JUEGO......\n");
 	ft_player_position(content, &p);
 	printf("EL JUGADOR SE ENCUENTRA EN LA FILA %i COLUMNA %i\n", p.player_row, p.player_column);
+	//ft_print_map(content, rows);
 	while (key_press != 'q')
 	{
 		ft_print_map(content, rows);
 		printf("WASD -> ");
-		scanf("%c", &key_press);
+		scanf(" %c", &key_press);
 		if (key_press != 'q')
 		{
 			if (key_press == 'w')
@@ -514,6 +523,7 @@ void	ft_kernel(char **content, int rows, int columns)
 				p.move = 'd';
 			}
 			ft_move_player(content, &p, rows, columns);
+			printf("NUEVA POSICION DEL PLAYER FILA -> %i \t COLUMNA -> %i\n", p.player_row, p.player_column);
 		}
 		else
 			printf("SALIENDO DEL JUEGO...");
