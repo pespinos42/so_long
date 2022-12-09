@@ -393,6 +393,29 @@ typedef struct s_point_exit
 	int		count_exits;
 }	t_point_exit;
 
+typedef struct s_point_enemy
+{
+	int		enemy_row;
+	int		enemy_column;
+	int		count_enemies;
+}	t_point_enemy;
+
+int	ft_check_enemy(int row_player, int column_player, t_point_enemy *enemies)
+{
+	int	index;
+	int	find;
+
+	index = 0;
+	find = 0;
+	while (index < enemies[0].count_enemies)
+	{
+		if (row_player == enemies[index].enemy_row && column_player == enemies[index].enemy_column)
+			find = 1;
+		index++;
+	}
+	return (find);
+}
+
 int	ft_check_finish(int row_player, int column_player, t_point_exit *exits)
 {
 	int	index;
@@ -461,6 +484,39 @@ t_point_exit	*ft_configure_exits(char **content, int rows, int columns)
 		r++;
 	}
 	return (exits);
+}
+
+t_point_enemy	*ft_configure_enemies(char **content, int rows, int columns)
+{
+	int				count_enemies;
+	int 			r;
+	int				c;
+	int				n_enemy;
+	t_point_enemy	*enemies;
+
+	count_enemies = 0;
+	r = 0;
+	n_enemy = 0;
+	ft_count_positions(content, rows, columns, &count_enemies, 'E');
+	enemies = malloc (count_enemies * sizeof (*enemies));
+	if (!enemies)
+		return (NULL);
+	enemies[0].count_enemies = count_enemies;
+	while (r < rows)
+	{
+		c = 0;
+		while (c < columns)
+		{
+			if (content[r][c] == 'X')
+			{
+				enemies[n_enemy].enemy_row = r;
+				enemies[n_enemy++].enemy_column = c;
+			}
+			c++;
+		}
+		r++;
+	}
+	return (enemies);
 }
 
 void	ft_print_map(char **content, int rows)
@@ -582,10 +638,12 @@ void	ft_kernel(char **content, int rows, int columns)
 	char			key_press;
 	t_player		p;
 	t_point_exit	*exits;
+	t_point_enemy	*enemies;
 	int				n_c;
 	//int							contador = 0;
 
 	exits = ft_configure_exits(content, rows, columns);
+	enemies = ft_configure_enemies(content, rows, columns);
 	key_press = 0;
 	p.player_row = 0;
 	p.player_column = 0;
@@ -634,6 +692,11 @@ void	ft_kernel(char **content, int rows, int columns)
 			if (n_c == 0 && ft_check_finish(p.player_row, p.player_column, exits))
 			{
 				printf("HAS GANADO!!!!!!!\n");
+				key_press = 'q';
+			}
+			if (ft_check_enemy(p.player_row, p.player_column, enemies))
+			{
+				printf("HAS MUERTO!!!!!!!!\n");
 				key_press = 'q';
 			}
 			
