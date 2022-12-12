@@ -34,6 +34,29 @@ typedef struct s_type_char
 	int	column;
 }	t_type_char;
 
+typedef struct s_player
+{
+	int	player_row;
+	int	player_column;
+	int	op_row;
+	int	op_column;
+	char	move;
+}	t_player;
+
+typedef struct s_point_exit
+{
+	int	exit_row;
+	int	exit_column;
+	int	count_exits;
+}	t_point_exit;
+
+typedef struct s_point_enemy
+{
+	int	enemy_row;
+	int	enemy_column;
+	int	count_enemies;
+}	t_point_enemy;
+
 //GET_NEXT_LINE_UTILS
 char	*ft_strjoin(char const *s1, char const *s2);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
@@ -52,5 +75,18 @@ int	ft_check_walls(char **content, int rows, int columns);
 char	**ft_create_content(int fd, int rows);
 void	ft_control_char_count(char **c, int row, int col, t_type_char *tc);
 int	ft_control_char(char **content, int rows, int columns);
+
+//KERNEL
+int	ft_check_enemy(int row_player, int column_player, t_point_enemy *enemies);
+int	ft_check_finish(int row_player, int column_player, t_point_exit *exits);
+void	ft_count_positions(char **content, int rows, int columns, int *count_positions, char letter);
+t_point_exit	*ft_configure_exits(char **content, int rows, int columns);
+t_point_enemy	*ft_configure_enemies(char **content, int rows, int columns);
+void	ft_print_map(char **content, int rows);
+void	ft_player_position(char **content, t_player *player);
+int	ft_check_prev_position(t_point_exit *exits, int row, int column);
+int	ft_check_other_position(char **content, t_player *player, int rows, int columns, t_point_exit *exits);
+int	ft_move_player(char **content, t_player *player, int rows, int columns, t_point_exit *exits);
+void	ft_kernel(char **content, int rows, int columns);
 
 #endif

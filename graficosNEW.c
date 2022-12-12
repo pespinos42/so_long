@@ -1,4 +1,4 @@
-#include "so_long.h"
+#include "so_longNEW.h"
 
 //GET_NEXT_LINE_UTILS------------------------------------------------------
 
@@ -354,6 +354,314 @@ int	ft_control_char(char **content, int rows, int columns)
 	return (1);
 }
 
+//KERNEL-------------------------------------------------------------------
+
+int	ft_check_enemy(int row_player, int column_player, t_point_enemy *enemies)
+{
+	int	index;
+	int	find;
+
+	index = 0;
+	find = 0;
+	while (index < enemies[0].count_enemies)
+	{
+		if (row_player == enemies[index].enemy_row && column_player == enemies[index].enemy_column)
+			find = 1;
+		index++;
+	}
+	return (find);
+}
+
+int	ft_check_finish(int row_player, int column_player, t_point_exit *exits)
+{
+	int	index;
+	int	find;
+
+	index = 0;
+	find = 0;
+	while (index < exits[0].count_exits)
+	{
+		if (row_player == exits[index].exit_row && column_player == exits[index].exit_column)
+			find = 1;
+		index++;
+	}
+	return (find);
+}
+
+void	ft_count_positions(char **content, int rows, int columns, int *count_positions, char letter)
+{
+	int	r;
+	int	c;
+
+	r = 0;
+	c = 0;
+	*count_positions = 0;
+	while (r < rows)
+	{
+		c = 0;
+		while (c < columns)
+		{
+			if (content[r][c] == letter)
+				*count_positions += 1;
+			c++;
+		}
+		r++;
+	}
+}
+
+t_point_exit	*ft_configure_exits(char **content, int rows, int columns)
+{
+	int		count_exit;
+	int		r;
+	int		c;
+	int		n_exit;
+	t_point_exit	*exits;
+
+	count_exit = 0;
+	r = 0;
+	n_exit = 0;
+	ft_count_positions(content, rows, columns, &count_exit, 'E');
+	exits = malloc (count_exit * sizeof (*exits));
+	if (!exits)
+		return (NULL);
+	exits[0].count_exits = count_exit;
+	while (r < rows)
+	{
+		c = 0;
+		while (c < columns)
+		{
+			if (content[r][c] == 'E')
+			{
+				exits[n_exit].exit_row = r;
+				exits[n_exit++].exit_column = c;
+			}
+			c++;
+		}
+		r++;
+	}
+	return (exits);
+}
+
+t_point_enemy	*ft_configure_enemies(char **content, int rows, int columns)
+{
+	int				count_enemies;
+	int 			r;
+	int				c;
+	int				n_enemy;
+	t_point_enemy	*enemies;
+
+	count_enemies = 0;
+	r = 0;
+	n_enemy = 0;
+	ft_count_positions(content, rows, columns, &count_enemies, 'E');
+	enemies = malloc (count_enemies * sizeof (*enemies));
+	if (!enemies)
+		return (NULL);
+	enemies[0].count_enemies = count_enemies;
+	while (r < rows)
+	{
+		c = 0;
+		while (c < columns)
+		{
+			if (content[r][c] == 'X')
+			{
+				enemies[n_enemy].enemy_row = r;
+				enemies[n_enemy++].enemy_column = c;
+			}
+			c++;
+		}
+		r++;
+	}
+	return (enemies);
+}
+
+void	ft_print_map(char **content, int rows)
+{
+	int	r;
+
+	r = 0;
+	while (r < rows)
+		printf("%s\n", content[r++]);
+}
+
+void	ft_player_position(char **content, t_player *player)
+{
+	int	find;
+
+	find = 0;
+	while (content[player->player_row] && find == 0)
+	{
+		player->player_column = 0;
+		while (content[player->player_row][player->player_column] && find == 0)
+		{
+			if (content[player->player_row][player->player_column] == 'P')
+				find = 1;
+			if (find == 0)
+				player->player_column += 1;
+		}
+		if (find == 0)
+			player->player_row += 1;
+	}
+}
+
+int	ft_check_prev_position(t_point_exit *exits, int row, int column)
+{
+	int	prev_exit;
+	int	index;
+
+	prev_exit = 0;
+	index = 0;
+	while (index < exits[0].count_exits && prev_exit == 0)
+	{
+		if (exits[index].exit_column == column && exits[index].exit_row == row)
+		{
+				prev_exit = 1;
+				printf("LA POSICION [%i][%i] ERA UNA SALIDA\n", exits[index].exit_row, exits[index].exit_column);
+		}
+        index++;
+	}
+	return (prev_exit);
+}
+
+int	ft_check_other_position(char **content, t_player *player, int rows, int columns, t_point_exit *exits)
+{
+	int	ok_data;
+	char str;
+
+	ok_data = 1;
+	printf("POSICION FUTURA: FILA -> %i \tCOLUMNA -> %i\n", player->op_row, player->op_column);
+	if (player->op_row < 0 || player->op_row >= rows)
+	{
+		printf("FILA INVALIDA\n");
+		ok_data = 0;
+	}
+	if (player->op_column < 0 || player->op_column >= columns)
+	{
+		printf("COLUMNA INVALIDA");
+		ok_data = 0;
+	}
+	if (ok_data == 1)
+	{
+		if (content[player->op_row][player->op_column] != '1')
+		{
+			content[player->op_row][player->op_column] = 'P';
+			if (ft_check_prev_position(exits, player->player_row, player->player_column))
+				content[player->player_row][player->player_column] = 'E';
+			else
+				content[player->player_row][player->player_column] = '0';
+			player->player_row = player->op_row;
+			player->player_column = player->op_column;
+			return (1);
+		}
+		else
+		{	
+			printf("HAY UN MURO EN ESA POSICION\n");
+			return(0);
+		}
+	}
+	else
+		return (0);
+	
+}
+
+int	ft_move_player(char **content, t_player *player, int rows, int columns, t_point_exit *exits)
+{	
+	if (player->move == 'w')
+	{
+		player->op_column = player->player_column;
+		player->op_row = player->player_row - 1;
+	}
+	else if (player->move == 'a')
+	{
+		player->op_column = player->player_column - 1;
+		player->op_row = player->player_row;
+	}
+	else if (player->move == 's')
+	{
+		player->op_column = player->player_column;
+		player->op_row = player->player_row + 1;
+	}
+	else if (player->move == 'd')
+	{
+		player->op_column = player->player_column + 1;
+		player->op_row = player->player_row;
+	}
+	return(ft_check_other_position(content, player, rows, columns, exits));
+}
+
+void	ft_kernel(char **content, int rows, int columns)
+{
+	char			key_press;
+	t_player		p;
+	t_point_exit	*exits;
+	t_point_enemy	*enemies;
+	int				n_c;
+	//int							contador = 0;
+
+	exits = ft_configure_exits(content, rows, columns);
+	enemies = ft_configure_enemies(content, rows, columns);
+	key_press = 0;
+	p.player_row = 0;
+	p.player_column = 0;
+	p.op_column = 0;
+	p.op_row = 0;
+	p.move = 0;
+	n_c = 0;
+	printf("\n\n\nCOMIENZA EL JUEGO......\n");
+	ft_player_position(content, &p);
+	printf("EL JUGADOR SE ENCUENTRA EN LA FILA %i COLUMNA %i\n", p.player_row, p.player_column);
+	while (key_press != 'q')
+	{
+		// if (contador == 0)
+		// 	key_press = 'd';
+		// else 
+		// 	key_press = 'a';
+		ft_print_map(content, rows);
+		printf("WASD -> ");
+		scanf(" %c", &key_press);
+		if (key_press != 'q')
+		{
+			if (key_press == 'w')
+			{
+				printf("JUGADOR MOVIENDOSE ARRIBA\n");
+				p.move = 'w';
+			}
+			else if (key_press == 'a')
+			{
+				printf("JUGADOR MOVIENDOSE IZQUIERDA\n");
+				p.move = 'a';
+			}
+			else if (key_press == 's')
+			{
+				printf("JUGADOR MOVIENDOSE ABAJO\n");
+				p.move = 's';
+			}
+			else if (key_press == 'd')
+			{
+				printf("JUGADOR MOVIENDOSE DERECHA\n");
+				p.move = 'd';
+			}
+			ft_move_player(content, &p, rows, columns, exits);
+			printf("NUEVA POSICION DEL PLAYER FILA -> %i \t COLUMNA -> %i\n", p.player_row, p.player_column);
+			ft_count_positions(content, rows, columns, &n_c, 'C');
+			printf("CONTADOR DE MONEDAS %i\n", n_c);
+			if (n_c == 0 && ft_check_finish(p.player_row, p.player_column, exits))
+			{
+				printf("HAS GANADO!!!!!!!\n");
+				key_press = 'q';
+			}
+			if (ft_check_enemy(p.player_row, p.player_column, enemies))
+			{
+				printf("HAS MUERTO!!!!!!!!\n");
+				key_press = 'q';
+			}
+			
+		}
+		else
+			printf("SALIENDO DEL JUEGO...");
+		// contador++;
+	}
+}
 
 //GRAFICOS-----------------------------------------------------------------
 
