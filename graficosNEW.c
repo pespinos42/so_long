@@ -706,19 +706,73 @@ void	ft_delete_all(mlx_t *mlx, t_t_i t_i)
 	mlx_terminate(mlx);
 }
 
+void	ft_draw_map(mlx_t *mlx, t_t_i t_i, char **content, int rows, int columns)
+{
+	int	r;
+	int	c;
+
+	r = 0;
+	c = 0;
+	while (r < rows)
+	{
+		c = 0;
+		while (c < columns)
+		{
+			if (content[r][c] == '1')
+				mlx_image_to_window(mlx, t_i.i_wa, 32 * c, 32 * r);
+			else if (content[r][c] == '0')
+				mlx_image_to_window(mlx, t_i.i_es, 32 * c, 32 * r);
+			else if (content[r][c] == 'P')
+				mlx_image_to_window(mlx, t_i.i_pl, 32 * c, 32 * r);
+			else if (content[r][c] == 'E')
+				mlx_image_to_window(mlx, t_i.i_ex, 32 * c, 32 * r);
+			else if (content[r][c] == 'C')
+				mlx_image_to_window(mlx, t_i.i_co, 32 * c, 32 * r);
+			else if (content[r][c] == 'X')
+				mlx_image_to_window(mlx, t_i.i_en, 32 * c, 32 * r);
+			c++;
+		}
+		r++;
+	}
+}
+
+
+//MAIN--------------------------------------------------------------------------------
+
 int	main(void)
 {
 	mlx_t	*mlx;
 	t_t_i	t_i;
 	int	width;
 	int	height;
-
+	char	**content;
+	int	rows;
+	int	columns;
+	int	fd;
+	
 	width = 500;
 	height = 500;
 	mlx = mlx_init(width, height, "PRUEBA SPRITES UBUNTU", false);
 	if (!mlx)
 		exit (EXIT_FAILURE);
+	//ft_initialize_data(&fd, &rows, &columns, content);
+	fd = 0;
+	rows = 0;
+	columns = 0;
+	fd = open("mapa1.ber", O_RDONLY);
+	rows = ft_number_rows(fd);
+	fd = open("mapa1.ber", O_RDONLY);
+	columns = ft_number_columns(fd);
+	fd = open("mapa1.ber", O_RDONLY);
+	content = ft_create_content(fd, rows);
 	ft_initialize_textures(&t_i, mlx);
+
+	if (ft_control_char(content, rows, columns))
+	{
+		ft_check_walls(content, rows, columns);
+		ft_kernel(content, rows, columns);
+	}
+
 	mlx_image_to_window(mlx, t_i.i_co, 32*0, 0);
 	mlx_image_to_window(mlx, t_i.i_es, 32*1, 0);
 	mlx_image_to_window(mlx, t_i.i_ex, 32*2, 0);
