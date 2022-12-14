@@ -291,9 +291,15 @@ int	ft_check_walls(char **content, int rows, int columns)
 		r++;
 	}
 	if (walls_ok)
+	{
 		printf("MUROS CORRECTOS\n");
+		return (1);
+	}
 	else
+	{
 		printf("MUROS ERRONEOS\n");
+		return (0);
+	}
 }
 
 char	**ft_create_content(int fd, int rows)
@@ -739,23 +745,35 @@ void	ft_draw_map(mlx_t *mlx, t_t_i t_i, char **content, int rows, int columns)
 
 //MAIN--------------------------------------------------------------------------------
 
+void	ft_prueba(void *param)
+{
+	mlx_t	*mlx;
+
+	mlx = param;
+	if (mlx_is_key_down(mlx, MLX_KEY_ESCAPE))
+		mlx_close_window(mlx);
+	else if (mlx_is_key_down(mlx, MLX_KEY_W))
+		printf("TECLA ARRIBA\n");
+	else if (mlx_is_key_down(mlx, MLX_KEY_S))
+		printf("TECLA ABAJO\n");
+	else if (mlx_is_key_down(mlx, MLX_KEY_A))
+		printf("TECLA IZQUIERDA\n");
+	else if (mlx_is_key_down(mlx, MLX_KEY_D))
+		printf("TECLA DERECHA\n");
+}
+
 int	main(void)
 {
 	mlx_t	*mlx;
 	t_t_i	t_i;
 	int	width;
 	int	height;
+	
 	char	**content;
 	int	rows;
 	int	columns;
 	int	fd;
 	
-	width = 500;
-	height = 500;
-	mlx = mlx_init(width, height, "PRUEBA SPRITES UBUNTU", false);
-	if (!mlx)
-		exit (EXIT_FAILURE);
-	//ft_initialize_data(&fd, &rows, &columns, content);
 	fd = 0;
 	rows = 0;
 	columns = 0;
@@ -765,21 +783,21 @@ int	main(void)
 	columns = ft_number_columns(fd);
 	fd = open("mapa1.ber", O_RDONLY);
 	content = ft_create_content(fd, rows);
+	
+	width = columns * 32;
+	height = rows * 32;
+	mlx = mlx_init(width, height, "PRUEBA SPRITES UBUNTU", false);
+	if (!mlx)
+		exit (EXIT_FAILURE);
 	ft_initialize_textures(&t_i, mlx);
+		
 
-	if (ft_control_char(content, rows, columns))
+	if (ft_control_char(content, rows, columns) && ft_check_walls(content, rows, columns))
 	{
-		ft_check_walls(content, rows, columns);
-		ft_kernel(content, rows, columns);
+		ft_draw_map(mlx, t_i, content, rows, columns);
+		mlx_loop_hook(mlx, &ft_prueba, mlx);
+		mlx_loop(mlx);
+		ft_delete_all(mlx, t_i);
 	}
-
-	mlx_image_to_window(mlx, t_i.i_co, 32*0, 0);
-	mlx_image_to_window(mlx, t_i.i_es, 32*1, 0);
-	mlx_image_to_window(mlx, t_i.i_ex, 32*2, 0);
-	mlx_image_to_window(mlx, t_i.i_pl, 32*3, 0);
-	mlx_image_to_window(mlx, t_i.i_wa, 32*4, 0);
-	mlx_image_to_window(mlx, t_i.i_en, 32*5, 0);
-	mlx_loop(mlx);
-	ft_delete_all(mlx, t_i);
 	return (EXIT_SUCCESS);
 }
